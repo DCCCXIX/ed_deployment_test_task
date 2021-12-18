@@ -53,13 +53,17 @@ class BertForMultilabelSequenceClassification(BertForSequenceClassification):
 
 class Model_Handler:
     def __init__(self):
-        self.model = BertForMultilabelSequenceClassification.from_pretrained("bhadresh-savani/bert-base-go-emotion")
+        self.device = torch.device("cpu") if not torch.cuda.is_available() else torch.device("cuda:0")
+        logging.info(f"Running on {'CPU' if not torch.cuda.is_available() else torch.cuda.get_device_name()}")
+        self.model = BertForMultilabelSequenceClassification.from_pretrained("bhadresh-savani/bert-base-go-emotion").to(
+            self.device
+        )
         self.tokenizer = AutoTokenizer.from_pretrained("bhadresh-savani/bert-base-go-emotion")
 
     def predict(self, text):
         try:
             input_ids = self.tokenizer.encode(text)
-            input_ids = torch.tensor(input_ids).unsqueeze(0)
+            input_ids = torch.tensor(input_ids).unsqueeze(0).to(self.device)
             result = self.model(input_ids).logits[0]
             result_dict = dict(zip(self.model.config.id2label.values(), [item.item() for item in result]))
         except Exception as e:
