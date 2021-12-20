@@ -6,6 +6,10 @@ from transformers.modeling_outputs import SequenceClassifierOutput
 
 
 class BertForMultilabelSequenceClassification(BertForSequenceClassification):
+    """
+    Custom class for multilabel sequence classification
+    """
+
     def __init__(self, config):
         super().__init__(config)
 
@@ -52,9 +56,15 @@ class BertForMultilabelSequenceClassification(BertForSequenceClassification):
 
 
 class Model_Handler:
+    """
+    Preloads the model from models repo and handles prediction calls
+    """
+
     def __init__(self):
         self.device = torch.device("cpu") if not torch.cuda.is_available() else torch.device("cuda:0")
-        logging.info(f"Running on {'CPU' if not torch.cuda.is_available() else torch.cuda.get_device_name()}")
+        logging.info(
+            f"Running on {'CPU' if self.device.type == 'cpu' else torch.cuda.get_device_name(self.device.index)}"
+        )
         self.model = BertForMultilabelSequenceClassification.from_pretrained("bhadresh-savani/bert-base-go-emotion").to(
             self.device
         )
@@ -63,14 +73,11 @@ class Model_Handler:
     def predict(self, text):
         try:
             input_ids = self.tokenizer.encode(text)
-            input_ids = torch.tensor(input_ids).unsqueeze(0).to(self.device)
-            result = self.model(input_ids).logits[0]
+            input_ids_tensor = torch.tensor(input_ids).unsqueeze(0).to(self.device)
+            result = self.model(input_ids_tensor).logits[0]
             result_dict = dict(zip(self.model.config.id2label.values(), [item.item() for item in result]))
         except Exception as e:
-            logging.info("Failed to proccess input")
-            logging.info(e)
+            logging.exception("Failed to proccess input")
+            # If failed to proccess an input - return an empty dict with zeroes as values
             result_dict = dict(zip(self.model.config.id2label.values(), [0.0 * self.model.config.num_labels]))
         return result_dict
-
-
-mh = Model_Handler()
