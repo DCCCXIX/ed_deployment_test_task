@@ -1,7 +1,9 @@
 ## A simple solution for serving a bert-based emotion detection model
 
 This implementation uses a pretrained emotion detection model for english language by Bhadresh Savani
+
 https://huggingface.co/bhadresh-savani/bert-base-go-emotion
+
 Served with flask and waitress
 
 ### Setup
