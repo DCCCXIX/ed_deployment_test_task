@@ -75,7 +75,10 @@ class Model_Handler:
             input_ids = self.tokenizer.encode(text)
             input_ids_tensor = torch.tensor(input_ids).unsqueeze(0).to(self.device)
             result = self.model(input_ids_tensor).logits[0]
-            result_dict = dict(zip(self.model.config.id2label.values(), [item.item() for item in result]))
+            # converting logits to probabilities
+            non_negative_vect = result + abs(result.min())
+            proba = non_negative_vect * (1 / sum(non_negative_vect))
+            result_dict = dict(zip(self.model.config.id2label.values(), [item.item() for item in proba]))
         except Exception as e:
             logging.exception("Failed to proccess input")
             # If failed to proccess an input - return an empty dict with zeroes as values
