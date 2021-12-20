@@ -19,6 +19,7 @@ class ControllerTestCase(unittest.TestCase):
         assert type(result) is dict
         assert len(result) == main.mh.model.classifier.out_features
         assert not all(value == 0 for value in result.values())
+        assert abs(sum(result.values()) - 1) < 0.000001
 
     def test_predict_post(self):
         response = self.client.post("/emotion-detection", json=self.payload)
