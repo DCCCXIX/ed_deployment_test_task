@@ -30,6 +30,13 @@ To launch the script execute in bash:
 ```bash
 python main.py
 ```
+This way the script will use the bhadresh-savani/bert-base-go-emotion model from huggingface.
+It's also possible to use different huggingface models by passing model name as an argument:
+```bash
+python main.py --model_name bhadresh-savani/bert-base-go-emotion
+```
+This approach will work for most text classification models from huggingface.
+
 Script's functionality can be checked be sending a post request to localhost on 5000 port.
 Example:
 ```
